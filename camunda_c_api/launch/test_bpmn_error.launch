@@ -1,0 +1,5 @@
+<!-- test_bpmn_error.launch -->
+
+<launch>
+  <node name="test_bpmn_error" type="test_bpmn_error" pkg="camunda_c_api" output="screen" launch-prefix="valgrind" />
+</launch>

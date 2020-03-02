@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<launch>
+    <include file="$(find resource_manager)/launch/resource_manager.launch">
+        <arg name="resource_return_topic" value="resource_return"/>
+        <arg name="request_resources_topic" value="request_resources"/>
+    </include>
+    <node pkg="resource_manager" type="test.py" name="test_node" output="screen">
+        <param name="resource_return_topic" value="resource_return"/>
+        <param name="request_resources_topic" value="request_resources"/>
+    </node>
+</launch>

@@ -1,0 +1,5 @@
+<!-- test_topics.launch -->
+
+<launch>
+  <node name="test_topics" type="test_topics" pkg="camunda_c_api" output="screen" launch-prefix="valgrind" />
+</launch>

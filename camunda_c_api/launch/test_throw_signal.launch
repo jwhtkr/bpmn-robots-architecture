@@ -1,0 +1,5 @@
+<!-- test_throw_signal.launch -->
+
+<launch>
+  <node name="test_throw_signal" type="test_throw_signal" pkg="camunda_c_api" output="screen" launch-prefix="valgrind" />
+</launch>

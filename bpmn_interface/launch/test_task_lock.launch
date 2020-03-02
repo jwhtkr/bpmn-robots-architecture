@@ -1,0 +1,5 @@
+<!-- test_task_lock.launch -->
+
+<launch>
+  <node name="test_task_lock" type="test_task_lock" pkg="bpmn_interface" output="screen" launch-prefix="valgrind" />
+</launch>

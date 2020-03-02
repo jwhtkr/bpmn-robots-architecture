@@ -1,0 +1,23 @@
+<!-- behavior_pool.launch -->
+<launch>
+  <arg name="behavior_name"          default="default_behavior_name" />
+  <arg name="base_uri"               default="default_base_uri" />
+  <arg name="status_topic"           default="default_status_topic" />
+  <arg name="get_resources_topic"    default="default_get_resources_topic" />
+  <arg name="give_resources_topic"   default="default_give_resources_topic" />
+  <arg name="update_resources_topic" default="default_update_resources_topic" />
+  <arg name="modify_robots_topic"    default="default_modify_robots_topic" />
+  <arg name="listen_topic"           default="default_listen_topic" />
+
+  <rosparam subst_value="true" >
+    behavior_name: $(arg behavior_name)
+    base_uri: $(arg base_uri)
+    status_topic: $(arg status_topic)
+    get_resources_topic: $(arg get_resources_topic)
+    give_resources_topic: $(arg give_resources_topic)
+    update_resources_topic: $(arg update_resources_topic)
+    modify_robots_topic: $(arg modify_robots_topic)
+    listen_topic: $(arg listen_topic)
+  </rosparam>
+</launch>
+<!-- behavior_pool.launch -->

@@ -1,0 +1,5 @@
+<!-- test_camunda_exception.launch -->
+
+<launch>
+  <node name="test_camunda_exception" type="test_camunda_exception" pkg="camunda_c_api" output="screen" launch-prefix="valgrind" />
+</launch>

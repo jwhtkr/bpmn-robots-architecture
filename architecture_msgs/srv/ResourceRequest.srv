@@ -1,0 +1,29 @@
+##
+# @File: ResourceRequest.srv
+#
+# @brief
+# Used to ask the Resource Manager for resources.
+#
+# @behavior_id
+# The ID of the behavior that is requesting resources.
+#
+# @priority
+# The priority of the behavior.
+#
+# @roles
+# List of all the resources the behavior needs and why.
+#
+# @success
+# Indicating if the allocation of resources was successful
+##
+
+string behavior_id
+uint8  priority
+architecture_msgs/Role[] roles
+
+---
+
+bool success
+architecture_msgs/Role[] roles
+
+## ResourceRequest.srv ##

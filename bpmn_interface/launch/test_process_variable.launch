@@ -1,0 +1,5 @@
+<!-- test_process_variable.launch -->
+
+<launch>
+  <node name="test_process_variable" type="test_process_variable" pkg="bpmn_interface" output="screen" launch-prefix="valgrind" />
+</launch>

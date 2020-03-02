@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>behavior_listener</name>
+  <version>0.0.0</version>
+  <description>The behavior_listener package which tracks BPMN external tasks and their status.</description>
+  <maintainer email="justinwhtkr@gmail.com">justin</maintainer>
+  <license>TODO</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <depend>architecture_msgs</depend>
+  <depend>rospy</depend>
+  <depend>std_msgs</depend>
+
+  <export></export>
+</package>

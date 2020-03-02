@@ -1,0 +1,5 @@
+<!-- test_error_handler.launch -->
+
+<launch>
+  <node name="test_error_handler" type="test_error_handler" pkg="bpmn_interface" output="screen" launch-prefix="valgrind" />
+</launch>

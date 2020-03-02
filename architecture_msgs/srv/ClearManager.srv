@@ -1,0 +1,11 @@
+##
+# @ClearManager.srv
+#
+# @brief
+# This service is used to reset the Resource Managers internal variables.
+##
+
+---
+
+
+## ClearManager.srv ##
