@@ -1,0 +1,29 @@
+<!-- template.launch -->
+<launch>
+  <rosparam>
+    arguments:
+      argument_name: "argument_value"
+
+    parameters:
+      param_name: 42
+
+    resources:
+      resource_location
+
+    resource_location:
+      name: "resource_name"
+      nodes:
+        name: "node_name"
+        package: "package_name"
+        executable_name: "executable_name"
+        launch_prefix: "launch_prefix"
+        ns: "Namespacing that will show up after robots namespacing"
+        args: "argv"
+        parameters:
+          param1: "value"
+          param2: 42
+        remappings:
+          from1: "to1"
+          from2: "to2"
+  </rosparam>
+</launch>

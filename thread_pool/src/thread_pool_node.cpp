@@ -19,43 +19,9 @@ int main(int argc, char** argv)
   ros::NodeHandle m_nh;
   ros::NodeHandle p_nh("~");
 
-  std::string service_provided_topic,
-              ros_node_server_start_topic,
-              ros_node_server_kill_topic,
-              config_file,
-              missing_params;
+  std::shared_ptr<thread_pool::ThreadPool> masterThreadPool(thread_pool::ThreadPool::makeThreadPool(p_nh));
 
-  if(!p_nh.getParam("service_provided_topic", service_provided_topic))
-  {
-    missing_params += "\tservice_provided_topic\n";
-  }
-  if(!p_nh.getParam("ros_node_server_start_topic", ros_node_server_start_topic))
-  {
-    missing_params += "\tros_node_server_start_topic\n";
-  }
-  if(!p_nh.getParam("ros_node_server_kill_topic", ros_node_server_kill_topic))
-  {
-    missing_params += "\tros_node_server_kill_topic\n";
-  }
-  if(!p_nh.getParam("config_file", config_file))
-  {
-    missing_params += "\tconfig_file\n";
-  }
-
-  if(!missing_params.empty())
-  {
-    ROS_ERROR_STREAM("The node " + ros::this_node::getName() + " can't find the following" +
-                     " ROS Server Parameters:\n" + missing_params);
-    ROS_ERROR_STREAM("The node " + ros::this_node::getName() + " is exiting");
-    exit(EXIT_FAILURE);
-  }
-
-  thread_pool::ThreadPool masterThreadPool(service_provided_topic,
-                                           ros_node_server_start_topic,
-                                           ros_node_server_kill_topic,
-                                           config_file);
-
-  ros::Rate loop_rate(30);
+  ros::Rate loop_rate(p_nh.param("spin_rate", 30));
 
   while(m_nh.ok())
   {
