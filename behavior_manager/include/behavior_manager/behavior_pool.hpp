@@ -68,8 +68,8 @@ namespace behavior_manager
     /**
      * @Assignment Operators
      **/
-    BehaviorPool& operator=(const BehaviorPool&) = delete;
-    BehaviorPool& operator=(BehaviorPool&&)      = delete;
+    BehaviorPool& operator=(const BehaviorPool&)  = delete;
+    BehaviorPool& operator=(      BehaviorPool&&) = delete;
     /**
      * @get
      *
@@ -259,6 +259,7 @@ namespace behavior_manager
                                      this->update_resources_topic,
                                      this->modify_robots_topic,
                                      this->resources_template);
+        this->behaviors.back().unpause();
         break;
       case architecture_msgs::Behavior::CANCELED:
       {
