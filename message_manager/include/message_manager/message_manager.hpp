@@ -21,7 +21,7 @@
 
 /* C++ Headers */
 #include<string>
-#include<vector>
+#include<set>
 
 class MessageManager
 {
@@ -42,25 +42,30 @@ public:
    * @Constructor
    *
    * @brief
-   * Started listening for new tasks and parses the passed in config file to find out
-   * what task names it is responsible for. Throws if config file can't be found or
-   * if the Json it contains is incorrectly formatted.
+   * Started listening for new tasks and parses the passed in config list to find out
+   * what task names it is responsible for.
    *
-   * @camunda_base_uri: The base URI that the camunda server can be found at
-   * @camunda_worker_id: The ID that Camunda will recognize this node by
-   * @new_take_topic: The topic that the Behavior Listener is publishing new Camunda
-   *                  tasks on
-   * @config_file_path: The absolute path of a file containing a list of behavior
-   *                    names that this node will respond to
+   * @parameters
+   * camunda_base_uri: The base URI that the camunda server can be found at
+   * camunda_worker_id: The ID that Camunda will recognize this node by
+   * new_take_topic: The topic that the Behavior Listener is publishing new Camunda
+   *                 tasks on
+   * config_namespace: The ROS Namespace containing a list of behavior
+   *                   names that this node will respond to
    **/
   MessageManager(const std::string& camunda_base_uri,
                  const std::string& camunda_worker_id,
                  const std::string& new_tasks_topic,
-                 const std::string& config_file_path);
+                 const std::string& config_namespace);
   /**
    * @Deconstructor
    **/
   ~MessageManager() noexcept = default;
+  /**
+   * @Assignment Operators
+   **/
+  MessageManager& operator=(const MessageManager&)  = delete;
+  MessageManager& operator=(      MessageManager&&) = delete;
 private:
   /* General helper members */
   ros::NodeHandle c_nh;
@@ -69,7 +74,7 @@ private:
   /* Gets and send messages to and from Camunda */
   bpmn::MessageHandler message_handler;
   /* What task names this object is responsible for */
-  std::vector<std::string> m_tasks;
+  std::set<std::string> m_tasks;
   /**
    * @newTaskCallback
    *

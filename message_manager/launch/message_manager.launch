@@ -3,12 +3,14 @@
 <launch>
   <arg name="new_task_topic"   default="new_task_topic"
        doc="The topic that the Behavior Listener publishes new tasks on." />
-  <arg name="config_file_path" default="$(find message_manager)/config/template.json"
-       doc="The absolute path of a Json file holding a list of task names this node will
+  <arg name="config_namespace" default=""
+       doc="The ROS Namespace holding a list of task names this node will
             relay messages for." />
+  <arg name="spin_rate"        default="50" />
 
   <node name="message_manager" pkg="message_manager" type="message_manager_node" output="screen" >
     <param name="new_task_topic"   value="$(arg new_task_topic)"   />
-    <param name="config_file_path" value="$(arg config_file_path)" />
+    <param name="config_namespace" value="$(arg config_namespace)" />
+    <param name="spin_rate"        value="$(arg spin_rate)"        />
   </node>
 </launch>

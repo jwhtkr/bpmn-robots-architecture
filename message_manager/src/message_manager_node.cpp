@@ -23,12 +23,13 @@ int main(int argc, char** argv)
   ros::NodeHandle m_nh;
   ros::NodeHandle p_nh("~");
 
-  std::string new_task_topic, config_file_path;
+  std::string new_task_topic;
+  std::string config_namespace;
 
-  ros::Rate loop_rate(50);
+  ros::Rate loop_rate(p_nh.param("spin_rate", 50));
 
-  if(!p_nh.getParam("new_task_topic",  new_task_topic) ||
-     !p_nh.getParam("config_file_path", config_file_path))
+  if(!p_nh.getParam("new_task_topic",   new_task_topic) ||
+     !p_nh.getParam("config_namespace", config_namespace))
   {
     throw std::runtime_error("ROS parameters for this node ain't set");
   }
@@ -36,7 +37,7 @@ int main(int argc, char** argv)
   MessageManager message_manager("http://localhost:8080/",
                                  "Message_Manager",
                                  new_task_topic,
-                                 config_file_path);
+                                 config_namespace);
 
   while(m_nh.ok())
   {

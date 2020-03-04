@@ -22,33 +22,29 @@
 /* Architecture Messages */
 #include<architecture_msgs/Behavior.h>
 
-/* Rest Headers */
-#include<cpprest/json.h>
-
 /* ROS Headers */
 #include<ros/ros.h>
 
 /* C++ Headers */
 #include<string>
+#include<vector>
+#include<set>
 #include<stdexcept>
 #include<utility>
 
 MessageManager::MessageManager(const std::string& camunda_base_uri,
                                const std::string& camunda_worker_id,
                                const std::string& new_tasks_topic,
-                               const std::string& config_file_path)
+                               const std::string& config_namespace)
 : new_task_sub(c_nh.subscribe(new_tasks_topic, 100, &MessageManager::newTaskCallback, this)),
   message_handler(camunda_base_uri, camunda_worker_id)
 {
   try
   {
-    web::json::array config_json(std::move(node_server::JsonPhraser::getJson(config_file_path).as_array()));
+    std::vector<std::string> config_list(this->c_nh.param(config_namespace, std::vector<std::string>()));
 
-    this->m_tasks.reserve(config_json.size());
-    for(auto topic_it = config_json.begin(); topic_it != config_json.end(); topic_it++)
-    {
-      this->m_tasks.emplace_back(std::move(topic_it->as_string()));
-    }
+    std::for_each(config_list.begin(), config_list.end(),
+      [this](std::string& ittr) { this->m_tasks.emplace(std::move(ittr)); });
   }
   catch(const std::exception& ex)
   {
