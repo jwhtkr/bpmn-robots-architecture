@@ -246,7 +246,7 @@ namespace behavior_manager
     {
       return;
     }
-std::cout << "BehaviorPool in listening_callback" << std::endl;
+
     switch(msg.status)
     {
       case architecture_msgs::Behavior::NEW:
@@ -279,7 +279,6 @@ std::cout << "BehaviorPool in listening_callback" << std::endl;
       default:
         return;
         break;
-std::cout << "BehaviorPool leaving listening_callback" << std::endl;
     }
   }
 }// behavior_manager

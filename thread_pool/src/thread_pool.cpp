@@ -243,8 +243,8 @@ namespace thread_pool
           std::pair<std::set<ResourceMsgs>::iterator, bool> new_resource;
 
           std::vector<node_server_msgs::NodeStart::Ptr> from_phraser =
-            phraser.substituteNodeStartList(ros::NodeHandle(config_namespace + *name_it), phraser.getGlobalStack());
-
+            phraser.substituteNodeStartList(ros::NodeHandle(config_namespace, *name_it), phraser.getGlobalStack());
+ROS_ERROR_STREAM(**from_phraser.begin());
           new_start_list.start.reserve(from_phraser.size());
           std::for_each(from_phraser.begin(), from_phraser.end(),
             [&new_start_list](const node_server_msgs::NodeStart::Ptr& ittr)

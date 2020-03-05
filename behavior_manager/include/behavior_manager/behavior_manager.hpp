@@ -301,7 +301,7 @@ namespace behavior_manager
     architecture_msgs::ResourceRequest resource_manager_call;
     ros::ServiceClient                 get_resources_srv(c_nh.template serviceClient<architecture_msgs::ResourceRequest>(get_resources_topic));
 
-     // Set up subscriptions and publications
+    // Set up subscriptions and publications
     this->c_nh.setCallbackQueue(&this->callback_queue);
 
     this->m_status_srv         = this->c_nh.advertiseService(getName() + "/" + status_topic,           &BehaviorManager::getStatus,       this);
