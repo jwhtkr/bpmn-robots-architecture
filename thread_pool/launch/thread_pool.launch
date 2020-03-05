@@ -10,7 +10,7 @@
   <arg name="ros_node_server_kill_topic"  default="ros_node_server_kill_topic"
        doc="The topic that will appear after a robots namespace that the ROS Node Servers
             will provide a way to kill nodes on." />
-  <arg name="config_namespce"             default="" />
+  <arg name="config_namespace"            default="" />
   <arg name="spin_rate"                   default="30" />
 
   <node name="thread_pool" type="thread_pool_node" pkg="thread_pool" output="screen" >
