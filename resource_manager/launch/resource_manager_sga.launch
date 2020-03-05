@@ -1,0 +1,30 @@
+<!-- resource_manager_sga.launch -->
+
+<launch>
+  <arg name="request_resources_topic"         default="request_resources"
+    doc="This is the topic that Behavior Managers will request resources with." />
+  <arg name="get_resources_topic"          default="get_resources"
+    doc="This is the topic that the Resource Manager will ask for resources back on." />
+  <arg name="resource_return_topic"           default="resource_return"
+    doc="This is the topic that the Behavior Managers release resources with."/>
+  <arg name="resources_path"                  default="$(find resource_manager)/src/resource_manager/resources.yaml"
+    doc="The path to the yaml file that specifies the available resources."/>
+  <arg name="only_specified"                  default="false"
+    doc="Indicates whether to only load the specified behaviors (true) or load default behaviors as well (false)"/>
+  <arg name="agents_path"                     default="$(find resource_manager)/config"
+    doc="The path to the directory that contains the agent configuration files."/>
+
+  <node name="resource_manager" type="resource_manager_sga.py" pkg="resource_manager" output="screen">
+    <param name="request_resources_topic"         value="$(arg request_resources_topic)" />
+    <param name="get_resources_topic"          value="$(arg get_resources_topic)" />
+    <param name="resource_return_topic"           value="$(arg resource_return_topic)"/>
+    <param name="resources_path"                  value="$(arg resources_path)"/>
+    <param name="agents_path"                     value="$(arg agents_path)"/>
+    <rosparam param="behavior_paths">
+      - "$(find resource_manager)/config/test_behaviors.config"
+    </rosparam>
+    <rosparam param="exception_packages">
+      []
+    </rosparam>
+  </node>
+</launch>

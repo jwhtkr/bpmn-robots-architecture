@@ -1,8 +1,8 @@
-"""Helper classes for the Resource Manager"""
-
+"""Helper classes for the Resource Manager."""
+from architecture_msgs.msg import Resource as ResourceMessage
 
 class ResourceLock(object):
-    """Represents the important info from the lock/request of a Resource"""
+    """Represents the important info from the lock/request of a Resource."""
     def __init__(self,
                  behavior_name,
                  behavior_priority,
@@ -36,14 +36,14 @@ class ResourceLock(object):
                                              self.required)
 
     def __eq__(self, other):
-        """Override equality function"""
+        """Override equality function."""
         if isinstance(self, type(other)):
             return (self.behavior_name == other.behavior_name
                     and self.role_name == other.role_name)
         return NotImplemented
 
     def __ne__(self, other):
-        """Override non-equality function"""
+        """Override non-equality function."""
         x = self.__eq__(other)
         if x is not NotImplemented:
             return not x
@@ -52,18 +52,18 @@ class ResourceLock(object):
 
     @property
     def priority(self):
-        """The combined priority based on the 3 internal priorities"""
+        """The combined priority based on the 3 internal priorities."""
         return self.combine_priorities()
 
     def combine_priorities(self):
-        """combines the priorities in a simple, unweighted linear fashion"""
+        """combines the priorities in a simple, unweighted linear fashion."""
         return (self.behavior_priority
                 + self.role_priority
                 + self.resource_priority)
 
 
 class Resource(object):
-    """The representation of a resource"""
+    """The representation of a resource."""
     def __init__(self, group_name, name, category, resource_type):
         self.group_name = group_name
         self.name = name
@@ -84,7 +84,7 @@ class Resource(object):
                                             self.type)
 
     def __eq__(self, other):
-        """Override equality function"""
+        """Override equality function."""
         if isinstance(self, type(other)):
             return (self.name == other.name
                     and self.category == other.category
@@ -92,25 +92,29 @@ class Resource(object):
         return NotImplemented
 
     def __ne__(self, other):
-        """Override non-equality function"""
+        """Override non-equality function."""
         x = self.__eq__(other)
         if x is not NotImplemented:
             return not x
         return NotImplemented
 
+    def __hash__(self):
+        """Override hash function to reflect equality function."""
+        return hash((self.name, self.category, self.type))
+
     @property
     def is_requested(self):
-        """Returns a boolean representing the request state"""
+        """Returns a boolean representing the request state."""
         return bool(self._request)
 
     @property
     def is_locked(self):
-        """Returns a boolean representing the lock state"""
+        """Returns a boolean representing the lock state."""
         return bool(self._lock)
 
     @property
     def priority(self):
-        """Returns the request/lock priority or -1 if not requested/locked"""
+        """Returns the request/lock priority or -1 if not requested/locked."""
         # requested priority takes precedence because if it's both requested and
         # locked the requested priority is always greater than the locked
         # priority.
@@ -121,15 +125,15 @@ class Resource(object):
         return -1
 
     def request(self, request):
-        """Requests the resource if possible, and returns a success boolean"""
+        """Requests the resource if possible, and returns a success boolean."""
         if not(self.is_locked or self.is_requested):
             self._request = request
             return True
-        # TODO: Update logic to include optionality and priority!
+        # TODO: Update logic to include optionality and priority
         return False
 
     def lock(self, lock):
-        """Locks the resource if appropriate and returns a success boolean"""
+        """Locks the resource if appropriate and returns a success boolean."""
         if self._request == lock:
             self._lock = lock
             self._request = None
@@ -137,7 +141,7 @@ class Resource(object):
         return False
 
     def un_request(self, request):
-        """If the requests match un-request the resource, else exception"""
+        """If the requests match un-request the resource, else exception."""
         if self._request == request:
             self._request = None
         else:
@@ -145,23 +149,35 @@ class Resource(object):
                              + " does not match the held request obj")
 
     def un_lock(self, lock):
-        """If the locks match unlock the resource, else raise an exception"""
+        """If the locks match unlock the resource, else raise an exception."""
         if self._lock == lock:
             self._lock = None
         else:
             raise ValueError("The lock obj requesting an unlock of a resource"
                              + " does not match the held lock obj")
 
+    def to_msg(self):
+        """Convert to a ROS message."""
+        msg = ResourceMessage(
+            group_name=self.group_name,
+            name=self.name,
+            category=self.category,
+            type=self.type,
+            required=False,
+            priority=0
+        )
+        return msg
+
+
 
 class ResourceGroup(object):
-    """Encapsulates resources that should be grouped together for any reason"""
-    def __init__(self, name, resources):
+    """Encapsulates resources that should be grouped together for any reason."""
+    def __init__(self, name, resources, agent_type=""):
         self.name = name
+        self.agent_type = agent_type
         self._resources = {}
 
         # resources stored as {resource_name: Resource}
-        if not isinstance(resources, dict):
-            raise TypeError("resources must be passed in as a dict type")
         self._build_resources(resources)
 
         self._category_type_resources = {}   # {category: {type: [Resources]}}
@@ -187,15 +203,21 @@ class ResourceGroup(object):
 
     @property
     def resources(self):
-        """Resources property to return the list of resources in the group"""
+        """Resources property to return the list of resources in the group."""
         return self._resources.values()
 
+    @resources.setter
+    def resources(self, resource_list):
+        """Set _resources from the list of resources provided."""
+        self._resources = {resource.name:resource for resource in resource_list}
+        self._build_category_type_resources()
+
     def get_resource(self, resource_name):
-        """Gets and individual resource by name"""
-        return self._resources[resource_name]
+        """Gets and individual resource by name."""
+        return self._resources.get(resource_name)
 
     def get_resources(self, resource_category, resource_type, sort=False):
-        """Gets a list of resources belonging to a certain category and type"""
+        """Gets a list of resources belonging to a certain category and type."""
         resources = self._category_type_resources.get(resource_category, {})
         resources = resources.get(resource_type, [])
         if sort:
@@ -203,14 +225,14 @@ class ResourceGroup(object):
         return resources
 
     # def get_resources_type(self, resource_type, sort=False):
-    #     """Gets a list of resources that have a certain type"""
+    #     """Gets a list of resources that have a certain type."""
     #     resources = self._type_resources[resource_type]
     #     if sort:
     #         return sorted(resources, key=lambda resource: resource.priority)
     #     return resources
 
     def get_resources_behavior(self, behavior_name):
-        """Gets a list of the resources that are locked by a behavior"""
+        """Gets a list of the resources that are locked by a behavior."""
         resources = []
         for resource in self._resources.itervalues():
             if (resource.is_locked
@@ -218,7 +240,7 @@ class ResourceGroup(object):
                 resources.append(resource)
 
     def _build_category_type_resources(self):
-        """Sorts the resources by category, then type, and stores them"""
+        """Sorts the resources by category, then type, and stores them."""
         for resource in self._resources.itervalues():
             if resource.category not in self._category_type_resources:
                 self._category_type_resources[resource.category] = \
@@ -231,15 +253,26 @@ class ResourceGroup(object):
                     category_dict[resource.type].append(resource)
 
     # def _build_type_resources(self):
-    #     """Sorts the resources by type and stores them"""
+    #     """Sorts the resources by type and stores them."""
     #     for resource in self._resources.itervalues():
     #         type_list = self._type_resources.get(resource.resource_type, [])
     #         type_list.append(resource)
 
     def _build_resources(self, resources):
-        """Createst the resources dict (with Resource objects) from a dict"""
+        """Create the resources dict (with Resource objects) from a dict."""
+        if not isinstance(resources, dict):
+            raise TypeError("resources must be passed in as a dict type")
         for resource_name, resource in resources.iteritems():
             self._resources[resource_name] = Resource(self.name,
                                                       resource_name,
                                                       resource['category'],
                                                       resource['type'])
+
+    def subset_of(self, other):
+        """Check if this group's resources are a subset of other's resources."""
+        for rsrc_category, rsrc_type_dict in self._category_type_resources.iteritems():  # pylint: disable=line-too-long
+            for rsrc_type, rsrc_list in rsrc_type_dict.iteritems():
+                other_rsrc_list = other.get_resources(rsrc_category, rsrc_type)
+                if len(rsrc_list) > len(other_rsrc_list):
+                    return False
+        return True

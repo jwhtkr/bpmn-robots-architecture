@@ -1,18 +1,26 @@
 #!/usr/bin/env python
 """This module contains a node for testing the resource manager node"""
 
-# from pdb import set_trace as pause
+from pdb import set_trace as pause
 
 import yaml
 
 import rospy
+from rospkg import RosPack as RP
 
 from architecture_msgs.srv import ResourceRequest  # pylint: disable=import-error
 from architecture_msgs.msg import Role, Resource   # pylint: disable=import-error
-
+from architecture_msgs.srv import ResourceRequest, ResourceRequestResponse
 
 if __name__ == "__main__":
     # pylint: disable=invalid-name
+
+    def update_resources_response(req):
+        res = ResourceRequestResponse()
+        res.success = True
+        res.roles   = req.roles
+        return res
+
     rospy.init_node('resource_manager_test')
 
     request_service_name = rospy.get_param("request_resources_topic",
@@ -21,11 +29,13 @@ if __name__ == "__main__":
                                           "resource_return")
     rospy.wait_for_service(return_service_name)
     rospy.wait_for_service(request_service_name)
-
-    request_resources = rospy.ServiceProxy(request_service_name, ResourceRequest)
+    rospy.Service('/behavior_1/update',ResourceRequest,update_resources_response)
+    rospy.Service('/behavior_2/update',ResourceRequest,update_resources_response)
+    request_resources = rospy.ServiceProxy(request_service_name, ResourceRequest)  # pylint: disable=line-too-long
     resource_return = rospy.ServiceProxy(return_service_name, ResourceRequest)
 
-    x = yaml.load(file('/home/justin/camunda_ws/src/resource_manager/src/resources.yaml'))  # pylint: disable=line-too-long
+    rm_dir = RP().get_path('resource_manager')
+    x = yaml.safe_load(file(rm_dir + '/src/resource_manager/resources.yaml'))
     roles = []
     roles.append(Role("role_1",
                       True,
@@ -75,4 +85,5 @@ if __name__ == "__main__":
     resp6 = resource_return("behavior_2", 10, [resp2.roles[1]])
     print resp6.success
 
-    # rospy.spin()
+    rospy.spin()
+

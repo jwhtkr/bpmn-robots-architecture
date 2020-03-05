@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<launch>
+  <include file="$(find resource_manager)/launch/resource_manager_sga.launch">
+    <arg name="resource_return_topic" value="resource_return"/>
+    <arg name="request_resources_topic" value="request_resources"/>
+    <arg name="only_specified" value="true"/>
+    <!-- <arg name="agents_path" value="(find resource_manager)/config"/> -->
+  </include>
+  <node pkg="resource_manager" type="test.py" name="test_node" output="screen">
+    <param name="resource_return_topic" value="resource_return"/>
+    <param name="request_resources_topic" value="request_resources"/>
+  </node>
+</launch>

@@ -1,4 +1,4 @@
-<!-- resource_manager.launch -->
+<!-- resource_manager_simple.launch -->
 
 <launch>
   <arg name="request_resources_topic"       default="request_resources"
@@ -7,7 +7,7 @@
        doc="This is the topic that the Resource Manager will ask for resources back on." />
   <arg name="resource_return_topic"          default="resource_return"
        doc="This is the topic that the Behavior Managers release resources with."/>
-  <arg name="resources_path"                 default="/home/justin/camunda_ws/src/resource_manager/src/resources.yaml"
+  <arg name="resources_path"                 default="$(find resource_manager)/src/resource_manager/resources.yaml"
        doc="The path to the yaml file that specifies the available resources."/>
 
   <node name="resource_manager" type="resource_manager_base.py" pkg="resource_manager" output="screen">

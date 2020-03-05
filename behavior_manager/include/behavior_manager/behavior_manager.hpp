@@ -423,6 +423,11 @@ namespace behavior_manager
   {}
 
   template<typename TASK_LOCK, typename ERROR>
+  void BehaviorManager<TASK_LOCK, ERROR>::resourcesUpdated(const std::vector<MonitoredResource>& bots_getting_deallocated,
+                                                           const std::vector<MonitoredResource>& bots_getting_allocated)
+  {}
+
+  template<typename TASK_LOCK, typename ERROR>
   void BehaviorManager<TASK_LOCK, ERROR>::manage(const uint32_t managing_rate)
   {
     try
@@ -499,7 +504,7 @@ namespace behavior_manager
       this->callThreadPool(thread_pool_call);
 
       // Let child class respond
-      this->updateResources(bots_to_allocate, bots_to_deallocate);
+      this->resourcesUpdated(bots_to_allocate, bots_to_deallocate);
 
       res.success = true;
     }
