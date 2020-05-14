@@ -10,6 +10,10 @@
 # @priority
 # The priority of the behavior.
 #
+# @info
+# YAML or JSON formatted string of Behavior level information
+# needed for the Resource Manager to calculate scores.
+#
 # @roles
 # List of all the resources the behavior needs and why.
 #
@@ -19,6 +23,7 @@
 
 string behavior_id
 uint8  priority
+string info
 architecture_msgs/Role[] roles
 
 ---

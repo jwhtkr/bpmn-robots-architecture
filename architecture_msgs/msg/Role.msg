@@ -13,6 +13,10 @@
 # @priority
 # How important this role is to its behavior.
 #
+# @info
+# Role level information needed for Resource Manager to calculate scores.
+# Formatted as a YAML or JSON string.
+#
 # @resources
 # The resources that this role uses.
 ##
@@ -20,6 +24,7 @@
 string name
 bool   required
 uint8  priority
+string info
 architecture_msgs/Resource[] resources
 
 ## Role.msg ##
