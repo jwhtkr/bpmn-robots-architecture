@@ -21,6 +21,10 @@
 #
 # @priority
 # How important this resource is to it's Role.
+#
+# @info
+# Role level information needed for Resource Manager to calculate scores.
+# Formatted as a YAML or JSON string.
 ##
 
 string group_name
@@ -29,5 +33,6 @@ string category
 string type
 bool   required
 uint8  priority
+string info
 
 ## Resource.msg ##
