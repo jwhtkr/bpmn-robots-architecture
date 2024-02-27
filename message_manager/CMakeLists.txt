@@ -1,7 +1,9 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(message_manager)
 
-add_compile_options(-std=c++17 -g -O0)
+add_compile_options(-std=c++17)
+#add_compile_options(-g -Og)
+add_compile_options(-O3)
 
 find_package(catkin REQUIRED
   COMPONENTS
@@ -52,11 +54,11 @@ add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EX
 ## Message Manager Node
 add_executable(${PROJECT_NAME}_node
   src/message_manager_node.cpp
-  src/message_manager.cpp
 )
 set_target_properties(${PROJECT_NAME}_node PROPERTIES OUTPUT_NAME ${PROJECT_NAME}_node PREFIX "")
 add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(${PROJECT_NAME}_node
+  ${PROJECT_NAME}
   cpprestsdk::cpprest
   ${catkin_LIBRARIES}
 )

@@ -108,8 +108,8 @@ namespace behavior_manager
     /**
      * @Assignment Operators
      **/
-    BehaviorManager& operator=(const BehaviorManager&) = delete;
-    BehaviorManager& operator=(BehaviorManager&&)      = delete;
+    BehaviorManager& operator=(const BehaviorManager&)  = delete;
+    BehaviorManager& operator=(      BehaviorManager&&) = delete;
     /**
      * @unpause
      *
@@ -169,6 +169,18 @@ namespace behavior_manager
      * A function that gets called when this behavior is put to sleep.
      **/
     virtual void sleeping();
+    /**
+     * @resourcesUpdated
+     *
+     * @brief
+     * A function that gets called when this behavior is given new resources, its resources are
+     * taken, and the resources change in any way.
+     *
+     *
+     *
+     **/
+    virtual void resourcesUpdated(const std::vector<MonitoredResource>& bots_getting_deallocated,
+                                  const std::vector<MonitoredResource>& bots_getting_allocated);
   private:
     /* Uniquely identifies this object */
     const std::string name;
@@ -279,10 +291,6 @@ namespace behavior_manager
      name(name + "/" + *dashToUnderscore(getInstanceId())),
      priority(task_lock.getPriority()),
      state(architecture_msgs::BehaviorStatus::Request::STARTING),
-     m_status_srv(        c_nh.advertiseService(getName() + "/" + status_topic, &BehaviorManager::getStatus, this)),
-     give_resources_srv(  c_nh.template serviceClient<architecture_msgs::ResourceRequest>(give_resources_topic)),
-     update_resources_srv(c_nh.advertiseService(getName() + "/" + update_resources_topic, &BehaviorManager::updateResources, this)),
-     modify_robots_srv(   c_nh.template serviceClient<architecture_msgs::ModifyRobots>(modify_robots_topic)),
      thread(&BehaviorManager::manage, this, managing_rate)
   {
     static_assert(std::is_base_of<bpmn::TaskLock<>, TASK_LOCK>::value,
@@ -293,8 +301,13 @@ namespace behavior_manager
     architecture_msgs::ResourceRequest resource_manager_call;
     ros::ServiceClient                 get_resources_srv(c_nh.template serviceClient<architecture_msgs::ResourceRequest>(get_resources_topic));
 
-     // Set up subscriptions and publications
+    // Set up subscriptions and publications
     this->c_nh.setCallbackQueue(&this->callback_queue);
+
+    this->m_status_srv         = this->c_nh.advertiseService(getName() + "/" + status_topic,           &BehaviorManager::getStatus,       this);
+    this->update_resources_srv = this->c_nh.advertiseService(getName() + "/" + update_resources_topic, &BehaviorManager::updateResources, this);
+    this->give_resources_srv   = this->c_nh.template serviceClient<architecture_msgs::ResourceRequest>(give_resources_topic);
+    this->modify_robots_srv    = this->c_nh.template serviceClient<architecture_msgs::ModifyRobots>(   modify_robots_topic);
 
     // Ask for resources
     resource_manager_call.request.behavior_id = this->getName();
@@ -325,9 +338,6 @@ namespace behavior_manager
     resource_manager_call.request.roles    = resource_manager_call.response.roles;
     resource_manager_call.response.success = false;
     this->updateResources(resource_manager_call.request, resource_manager_call.response);
-
-    // Let the thread do it's work
-    this->updateState(architecture_msgs::BehaviorStatus::Request::RUNNING);
   }
 
   template<typename TASK_LOCK, typename ERROR>
@@ -413,6 +423,11 @@ namespace behavior_manager
   {}
 
   template<typename TASK_LOCK, typename ERROR>
+  void BehaviorManager<TASK_LOCK, ERROR>::resourcesUpdated(const std::vector<MonitoredResource>& bots_getting_deallocated,
+                                                           const std::vector<MonitoredResource>& bots_getting_allocated)
+  {}
+
+  template<typename TASK_LOCK, typename ERROR>
   void BehaviorManager<TASK_LOCK, ERROR>::manage(const uint32_t managing_rate)
   {
     try
@@ -462,7 +477,7 @@ namespace behavior_manager
   {
     try
     {
-      std::unique_lock<std::mutex>    resources_lock(this->resources.getLock());
+      std::lock_guard<std::mutex>     resources_lock(this->resources.getLock());
       std::vector<MonitoredResource>  bots_to_allocate;
       std::vector<MonitoredResource>  bots_to_deallocate;
       architecture_msgs::ModifyRobots thread_pool_call;
@@ -488,6 +503,9 @@ namespace behavior_manager
 
       this->callThreadPool(thread_pool_call);
 
+      // Let child class respond
+      this->resourcesUpdated(bots_to_allocate, bots_to_deallocate);
+
       res.success = true;
     }
     catch(const std::exception& ex)
@@ -509,7 +527,7 @@ namespace behavior_manager
   template<typename TASK_LOCK, typename ERROR>
   void BehaviorManager<TASK_LOCK, ERROR>::releaseAllRobots()
   {
-    std::unique_lock<std::mutex> res_lock(this->resources.getLock());
+    std::lock_guard<std::mutex> res_lock(this->resources.getLock());
     // Get a list of the robots this object is using
     std::vector<std::reference_wrapper<MonitoredRole>> in_use(this->resources.getAllInUse());
 

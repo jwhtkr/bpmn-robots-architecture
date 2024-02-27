@@ -1,0 +1,4 @@
+<launch>
+    <node pkg="resource_manager" type="resource_manager_sga_test_node.py" name="resource_manager"/>
+    <test test-name="ros_level_resource_manager_tests" pkg="resource_manager" type="test_ros_resource_manager_SGA.py"/>
+</launch>

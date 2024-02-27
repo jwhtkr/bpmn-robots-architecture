@@ -1,9 +1,7 @@
 /**
  * @File: thread_pool.cpp
- * @Date: 2 August 2019
+ * @Date: March 2020
  * @Author: James Swedeen
- *
- * @brief
  **/
 
 /* Local Headers */
@@ -11,7 +9,7 @@
 #include"thread_pool/data_objects.hpp"
 
 /* ROS Node Server Headers */
-#include<launcher_helpers/json_phraser.hpp>
+#include<launcher_helpers/param_server_phraser.hpp>
 
 /* ROS Node Server Messages */
 #include<node_server_msgs/StartNodeList.h>
@@ -22,14 +20,12 @@
 /* Architecture Messages */
 #include<architecture_msgs/ModifyRobots.h>
 
-/* Rest Headers */
-#include<cpprest/json.h>
-
 /* ROS Headers */
 #include<ros/ros.h>
 
 /* C++ Headers */
 #include<string>
+#include<set>
 #include<mutex>
 #include<memory>
 #include<stdexcept>
@@ -43,10 +39,10 @@ namespace thread_pool
   ThreadPool::ThreadPool(const std::string& service_provided_topic,
                          const std::string& ros_node_server_start_topic,
                          const std::string& ros_node_server_kill_topic,
-                         const std::string& config_file)
+                         const std::string& config_namespace)
    : ros_node_server_start_regex(ros_node_server_start_topic),
      ros_node_server_kill_regex( ros_node_server_kill_topic),
-     resources(std::move(*parseConfigFile(config_file))),
+     resources(parseConfig(config_namespace)),
      provide_srv(c_nh.advertiseService(service_provided_topic, &ThreadPool::setupRobotsCallback, this))
   {}
 
@@ -61,7 +57,7 @@ namespace thread_pool
     std::string service_provided_topic,
                 ros_node_server_start_topic,
                 ros_node_server_kill_topic,
-                config_file,
+                config_namespace,
                 missing_params;
 
     if(!p_nh.getParam("service_provided_topic", service_provided_topic))
@@ -76,9 +72,9 @@ namespace thread_pool
     {
       missing_params += "\tros_node_server_kill_topic\n";
     }
-    if(!p_nh.getParam("config_file", config_file))
+    if(!p_nh.getParam("config_namespace", config_namespace))
     {
-      missing_params += "\tconfig_file\n";
+      missing_params += "\tconfig_namespace\n";
     }
 
     if(!missing_params.empty())
@@ -90,7 +86,7 @@ namespace thread_pool
     return std::make_shared<thread_pool::ThreadPool>(service_provided_topic,
                                                      ros_node_server_start_topic,
                                                      ros_node_server_kill_topic,
-                                                     config_file);
+                                                     config_namespace);
   }
 
   bool ThreadPool::setupRobotsCallback(architecture_msgs::ModifyRobots::Request& req,
@@ -98,7 +94,7 @@ namespace thread_pool
   {
     try
     {
-      std::unique_lock<std::mutex> srv_lock(this->srv_mux);
+      std::lock_guard<std::mutex> srv_lock(this->srv_mux);
 
       for(auto robot_it = req.robots.cbegin(); robot_it != req.robots.cend(); robot_it++)
       {
@@ -109,14 +105,14 @@ namespace thread_pool
         {
           node_server_msgs::Kill kill_srv;
           // Find the node
-          std::map<std::string, ResourceMsgs>::iterator m_resource = this->resources.find(*resources_it);
+          std::set<ResourceMsgs>::const_iterator m_resource = this->resources.find(ResourceMsgs(*resources_it));
           if(this->resources.end() == m_resource)
           {
             throw std::runtime_error("resource " + *resources_it + " can't be found");
           }
 
-          std::map<std::string, std::vector<node_server_msgs::Target>>::iterator m_targets = m_resource->second.targets.find(robot_it->name);
-          if(m_resource->second.targets.end() == m_targets)
+          std::map<std::string, std::vector<node_server_msgs::Target>>::const_iterator m_targets = m_resource->targets.find(robot_it->name);
+          if(m_resource->targets.end() == m_targets)
           {
             throw std::runtime_error("targets for resource '" + *resources_it + "' and robot '" + robot_it->name + "' could not be found");
           }
@@ -129,7 +125,7 @@ namespace thread_pool
             throw std::runtime_error("ROS Node Server failed to kill one or all nodes requested");
           }
 
-          m_resource->second.targets.erase(m_targets);
+          m_resource->targets.erase(m_targets);
         }
 
         // Start the nodes requested
@@ -138,7 +134,7 @@ namespace thread_pool
           node_server_msgs::StartNodeList start_srv;
           node_server_msgs::Target        targets;
           // Find message data
-          std::map<std::string, ResourceMsgs>::iterator m_resource = this->resources.find(*resources_it);
+          std::set<ResourceMsgs>::iterator m_resource = this->resources.find(ResourceMsgs(*resources_it));
           if(this->resources.end() == m_resource)
           {
             throw std::runtime_error("can't find startup information for resource " + *resources_it);
@@ -146,7 +142,7 @@ namespace thread_pool
 
           // Setup service call
           start_srv.request.name  = robot_it->name + std::string("/") + *resources_it;
-          start_srv.request.nodes = m_resource->second.start;
+          start_srv.request.nodes = m_resource->start;
           for(auto service_it = start_srv.request.nodes.begin(); service_it != start_srv.request.nodes.end(); service_it++)
           {
             if(std::string() != service_it->ns)
@@ -172,7 +168,7 @@ namespace thread_pool
           }
 
           // Fill in target information for those nodes
-          std::vector<node_server_msgs::Target>& target_ref = m_resource->second.targets[robot_it->name];
+          std::vector<node_server_msgs::Target>& target_ref = m_resource->targets[robot_it->name];
 
           target_ref.emplace_back();
 
@@ -192,12 +188,12 @@ namespace thread_pool
   RobotServices& ThreadPool::findNodeServer(const std::string& name)
   {
     // Look for the right robot service clients
-    std::map<std::string, RobotServices>::iterator service = this->robots_srv.find(name);
+    std::set<RobotServices>::const_iterator service = this->robots_srv.find(RobotServices(name));
 
     // If robot isn't present look for it
     if(this->robots_srv.end() == service)
     {
-      RobotServices new_srv;
+      RobotServices new_srv(name);
 
       if(!ros::service::exists("/" + name + "/" + this->ros_node_server_start_regex, false))
       {
@@ -212,49 +208,55 @@ namespace thread_pool
       new_srv.starter = this->c_nh.serviceClient<node_server_msgs::StartNodeList>(std::string("/") + name + std::string("/") + this->ros_node_server_start_regex);
       new_srv.ender   = this->c_nh.serviceClient<node_server_msgs::Kill>         (std::string("/") + name + std::string("/") + this->ros_node_server_kill_regex);
 
-      service = this->robots_srv.emplace(name, std::move(new_srv)).first;
+      service = this->robots_srv.emplace(std::move(new_srv)).first;
     }
 
-    return service->second;
+    return const_cast<RobotServices&>(*service);
   }
 
-  std::shared_ptr<std::map<std::string, ResourceMsgs>> ThreadPool::parseConfigFile(const std::string config_file) const
+  std::set<ResourceMsgs> ThreadPool::parseConfig(const std::string config_namespace)
   {
     try
     {
-      std::shared_ptr<std::map<std::string, ResourceMsgs>> output(new std::map<std::string, ResourceMsgs>());
-      web::json::value                                     json(node_server::JsonPhraser::getJson(config_file));
-      node_server::JsonPhraser                             phraser;
+      std::set<ResourceMsgs>          output;
+      node_server::ParamServerPhraser phraser;
+      ros::NodeHandle                 nh(config_namespace);
+      std::vector<std::string>        resource_list;
 
       // Setup substitution arguments
-      if(json.has_array_field("arguments"))
+      if(nh.hasParam("arguments"))
       {
-        phraser.configArgs(json.at("arguments"),    phraser.getGlobalStack());
+        phraser.configArgs(ros::NodeHandle(config_namespace + "arguments"),    phraser.getGlobalStack());
       }
-      if(json.has_array_field("parameters"))
+
+      if(nh.hasParam("parameters"))
       {
-        phraser.uploadParams(json.at("parameters"), phraser.getGlobalStack());
+        phraser.uploadParams(ros::NodeHandle(config_namespace), phraser.getGlobalStack());
       }
 
       // Transform data
-      for(auto json_it = json.at("resources").as_array().begin(); json_it != json.at("resources").as_array().end(); json_it++)
+      if(nh.getParam("resources", resource_list))
       {
-        ResourceMsgs                                                   new_start_list;
-        std::pair<std::map<std::string, ResourceMsgs>::iterator, bool> new_resource;
-
-        auto from_phraser = phraser.substituteNodeStartList(std::move(json_it->at("nodes")), phraser.getGlobalStack());
-
-        new_start_list.start.reserve(from_phraser.size());
-        std::for_each(from_phraser.begin(), from_phraser.end(),
-          [&new_start_list](const node_server_msgs::NodeStart::Ptr& ittr)
-          {
-            new_start_list.start.emplace_back(std::move(*ittr));
-          });
-
-        new_resource = output->emplace(json_it->at("name").as_string(), new_start_list);
-        if(!new_resource.second)
+        for(auto name_it = resource_list.begin(); name_it != resource_list.end(); name_it++)
         {
-          throw std::runtime_error("the resource name " + json_it->at("name").as_string() + " is repeated which is not aloud.");
+          ResourceMsgs                                      new_start_list(*name_it);
+          std::pair<std::set<ResourceMsgs>::iterator, bool> new_resource;
+
+          std::vector<node_server_msgs::NodeStart::Ptr> from_phraser =
+            phraser.substituteNodeStartList(ros::NodeHandle(config_namespace, *name_it), phraser.getGlobalStack());
+ROS_ERROR_STREAM(**from_phraser.begin());
+          new_start_list.start.reserve(from_phraser.size());
+          std::for_each(from_phraser.begin(), from_phraser.end(),
+            [&new_start_list](const node_server_msgs::NodeStart::Ptr& ittr)
+            {
+              new_start_list.start.emplace_back(std::move(*ittr));
+            });
+
+          new_resource = output.emplace(new_start_list);
+          if(!new_resource.second)
+          {
+            throw std::runtime_error("the resource name " + *name_it + " is repeated which is not aloud.");
+          }
         }
       }
 
@@ -265,7 +267,6 @@ namespace thread_pool
       throw std::runtime_error("ThreadPool::parseConfigFile error, " + static_cast<std::string>(e.what()));
     }
   }
-
 }// thread_pool
 
 /* thread_pool.cpp */

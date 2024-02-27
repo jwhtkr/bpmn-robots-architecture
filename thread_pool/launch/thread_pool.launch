@@ -10,13 +10,14 @@
   <arg name="ros_node_server_kill_topic"  default="ros_node_server_kill_topic"
        doc="The topic that will appear after a robots namespace that the ROS Node Servers
             will provide a way to kill nodes on." />
-  <arg name="config_file"                 default="$(find thread_pool)/config/template.json"
-       doc="A file that holds all the information needed to launch resources." />
+  <arg name="config_namespace"            default="" />
+  <arg name="spin_rate"                   default="30" />
 
   <node name="thread_pool" type="thread_pool_node" pkg="thread_pool" output="screen" >
     <param name="service_provided_topic"      value="$(arg service_provided_topic)"      />
     <param name="ros_node_server_start_topic" value="$(arg ros_node_server_start_topic)" />
     <param name="ros_node_server_kill_topic"  value="$(arg ros_node_server_kill_topic)"  />
-    <param name="config_file"                 value="$(arg config_file)"                 />
+    <param name="config_namespace"            value="$(arg config_namespace)"            />
+    <param name="spin_rate"                   value="$(arg spin_rate)"                   />
   </node>
 </launch>

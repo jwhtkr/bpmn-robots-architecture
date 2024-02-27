@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <launch>
-    <include file="$(find resource_manager)/launch/resource_manager.launch">
+    <include file="$(find resource_manager)/launch/resource_manager_simple.launch">
         <arg name="resource_return_topic" value="resource_return"/>
         <arg name="request_resources_topic" value="request_resources"/>
     </include>
