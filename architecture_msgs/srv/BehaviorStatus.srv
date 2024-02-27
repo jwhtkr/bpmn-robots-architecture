@@ -1,0 +1,39 @@
+##
+# @BehaviorStatus.srv
+#
+# @brief
+# This service is used to get the status of a particular Behavior Manager.
+#
+# @name
+# The name and instance id of the service.
+#
+# @description
+# A description of the behavior.
+#
+# @managerStatus
+# What state the Behavior Manager is in.
+#
+# @behaviorStatus
+# How the behavior itself is doing.
+##
+
+## Possible states for the Behavior Manager to be in ##
+# The Object is still getting resources from the Resource Manager
+uint8 STARTING = 4
+# Object has all of the resources it needs and is executing behavior code
+uint8 RUNNING = 3
+# Object is in a waiting state where nothing will happen but it giving up resources
+uint8 PAUSED = 2
+# Object is in the process of deconstructing
+uint8 SHUTTING_DOWN = 1
+# Explicitly denotes nothing
+uint8 NULL_STATUS = 0
+
+---
+
+string name
+string description
+uint8  managerStatus
+string behaviorStatus
+
+## BehaviorStatus.srv ##

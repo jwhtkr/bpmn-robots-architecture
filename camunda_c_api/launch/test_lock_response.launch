@@ -1,0 +1,5 @@
+<!-- test_lock_response.launch -->
+
+<launch>
+  <node name="test_lock_response" type="test_lock_response" pkg="camunda_c_api" output="screen" launch-prefix="valgrind" />
+</launch>

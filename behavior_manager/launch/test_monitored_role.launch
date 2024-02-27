@@ -1,0 +1,5 @@
+<!-- test_monitored_role.launch -->
+
+<launch>
+  <node name="test_monitored_role" type="test_monitored_role" pkg="behavior_manager" output="screen" launch-prefix="valgrind" />
+</launch>

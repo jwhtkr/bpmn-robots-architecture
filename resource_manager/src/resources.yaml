@@ -1,0 +1,105 @@
+---
+  robot_1:
+    multiplicity: 3
+    resources:
+      diff_drive:
+        category: mobility
+        type: 2d_unicycle
+      camera_1:
+        category: sensors
+        type: rgb_camera
+      camera_2:
+        category: sensors
+        type: infrared_camera
+      lidar:
+        category: sensors
+        type: lidar
+      raspi:
+        category: computation
+        type: raspi
+      wifi:
+        category: comms
+        type: 100mb_wifi
+
+  robot_2:
+    multiplicity: 1
+    resources:
+      diff_drive:
+        category: mobility
+        type: 2d_bicycle
+      camera_1:
+        category: sensors
+        type: rgb_camera
+      camera_2:
+        category: sensors
+        type: rgb_camera
+      robot_arm:
+        category: actuator
+        type: 3axis
+      raspi:
+        category: computation
+        type: raspi
+      wifi:
+        category: comms
+        type: 100mb_wifi
+      gps:
+        category: sensors
+        type: gps
+
+  drone_1:
+    multiplicity: 6
+    resources:
+      quad_rotor:
+        category: mobility
+        type: 3d_quad_rotor
+      camera_array:
+        category: sensors
+        type: rgb_camera_array
+      gps:
+        category: sensors
+        type: gps
+      radio:
+        category: comms
+        type: rf
+
+  drone_2:
+    multiplicity: 2
+    resources:
+      fixed_wing:
+        category: mobility
+        type: 3d_fixed_wing
+      camera_1:
+        category: sensors
+        type: infrared_camera
+      camera_2:
+        category: sensors
+        type: infrared_camera
+      sprayer:
+        category: actuator
+        type: sprayer
+      radio:
+        category: comms
+        type: rf
+      wifi:
+        category: comms
+        type: 200mb_wifi
+
+  server:
+    multiplicity: 1
+    resources:
+      server:
+        category: computation
+        type: server
+      wifi:
+        category: comms
+        type: 500mb_wifi
+
+  local_machine:
+    multiplicity: 3
+    resources:
+      local_machine:
+        category: computation
+        type: server
+      wifi:
+        category: comms
+        type: 500mb_wifi

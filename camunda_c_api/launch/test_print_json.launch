@@ -1,0 +1,5 @@
+<!-- test_print_json.launch -->
+
+<launch>
+  <node name="test_print_json" type="test_print_json" pkg="camunda_c_api" output="screen" launch-prefix="valgrind" />
+</launch>

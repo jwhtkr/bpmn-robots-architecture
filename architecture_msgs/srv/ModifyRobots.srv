@@ -1,0 +1,15 @@
+##
+# @File: ModifyRobots.srv
+#
+# @brief
+# Tells Master ThreadPool that robots need to be spun up, shutdown, or remapped.
+#
+# @robots
+# List of robots to be modified
+##
+
+architecture_msgs/Robot[] robots
+
+---
+
+## ModifyRobots.srv ##

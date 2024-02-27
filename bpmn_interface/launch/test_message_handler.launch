@@ -1,0 +1,5 @@
+<!-- test_message_handler.launch -->
+
+<launch>
+  <node name="test_message_handler" type="test_message_handler" pkg="bpmn_interface" output="screen" launch-prefix="valgrind" />
+</launch>

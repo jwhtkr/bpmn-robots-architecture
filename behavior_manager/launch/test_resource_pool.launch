@@ -1,0 +1,5 @@
+<!-- test_resource_pool.launch -->
+
+<launch>
+  <node name="test_resource_pool" type="test_resource_pool" pkg="behavior_manager" output="screen" launch-prefix="valgrind" />
+</launch>

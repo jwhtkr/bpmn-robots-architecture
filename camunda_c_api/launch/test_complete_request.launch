@@ -1,0 +1,5 @@
+<!-- test_complete_request.launch -->
+
+<launch>
+  <node name="test_complete_request" type="test_complete_request" pkg="camunda_c_api" output="screen" launch-prefix="valgrind" />
+</launch>
